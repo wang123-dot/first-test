@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtualenv
+.venv/
+venv/
+ENV/
+
+# Editors/OS
+.vscode/
+.idea/
+.DS_Store
+
+# Local config
+config.yaml
