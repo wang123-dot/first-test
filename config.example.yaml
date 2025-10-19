@@ -1,0 +1,89 @@
+# 账号与基础设置
+credentials:
+  username: "你的学号"
+  password: "你的密码"
+
+site:
+  base_url: "https://example.university.edu"
+
+  # 登录配置
+  login:
+    # 访问登录页（若无需则留空或删除 page_path）
+    page_path: "/auth/login"
+    # 提交登录的接口地址
+    submit_path: "/auth/login"
+    submit_method: "POST"
+    # 登录请求头（可选）
+    headers: {}
+    # 登录表单字段映射
+    fields:
+      username_field: "username"       # 用户名字段名
+      password_field: "password"       # 密码字段名
+      # 固定的附加字段（可选）
+      static: { remember_me: "on" }
+    # 需要从登录页 HTML 中提取的隐藏字段/CSRF（可选）
+    extract:
+      - name: "csrf_token"
+        selector: "input[name=csrf_token]"
+        attr: "value"
+    # 判定登录成功与失败（至少配置一个）
+    success:
+      # 登录成功后页面应该出现的选择器（比如头像/用户名）
+      css_selector: "#userProfile"
+      # 或者匹配成功后跳转的相对路径（可选）
+      # redirect_path: "/student/home"
+    failure:
+      # 若页面含有该文本则判定为失败（可选）
+      text_contains: "用户名或密码错误"
+
+  # 自动选课配置
+  enroll:
+    enabled: true
+    # 课程列表页面（GET）
+    list_path: "/student/courses"
+    # 列表页中“每一门课”的容器选择器
+    item_selector: "table#courseList tbody tr"
+    # 解析每一项课程需要提取的字段
+    parse:
+      id:    { selector: "td.col-id", attr: "text" }
+      name:  { selector: "td.col-name", attr: "text" }
+      link:  { selector: "a.enroll",   attr: "href" }
+    # 过滤目标课程（命中任一条件即尝试选课）
+    filter:
+      ids: ["CS101", "MATH202"]     # 指定课程 ID（可空）
+      include_keywords: ["计算机", "高等数学"]
+      exclude_keywords: []
+    # 提交选课（两种方式：1. 直接打开 link; 2. 通过接口提交）
+    submit:
+      method: "GET"                    # GET 直接打开 link；或 POST 向指定 path 提交
+      # 若使用 POST，可以设置：path: "/student/enroll"
+      # fields: { course_id: "{{id}}" }
+    # 选课成功判定（任一命中即可）
+    success:
+      text_contains: ["选课成功", "已加入课程"]
+
+  # 自动评教配置
+  evaluate:
+    enabled: true
+    # 待评教列表页面
+    list_path: "/student/evaluations"
+    item_selector: "table#evaluationList tbody tr"
+    parse:
+      id:   { selector: "td.col-id", attr: "text" }
+      name: { selector: "td.col-name", attr: "text" }
+      link: { selector: "a.evaluate", attr: "href" }
+    # 评教页面 form 选择器（默认取第一个 form）
+    form_selector: "form#evaluationForm"
+    # 填表策略
+    strategy:
+      # 单选题（radio）：取数值最大的 value；若非数值，取最后一个
+      radio: "max"   # 可选：max | first | last
+      # 复选题（checkbox）：默认不选；可选 all 选择全部
+      checkbox: "none"   # 可选：none | all
+      # 下拉框（select）：取最后一个非空；可选 first/last
+      select: "last"
+      # 文本域内容
+      textarea: "老师讲课认真负责，课堂内容充实，课程收获很大。"
+    # 提交成功判定
+    success:
+      text_contains: ["提交成功", "感谢您的评价"]
